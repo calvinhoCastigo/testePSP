@@ -1,5 +1,3 @@
-import Cliente from "./Cliente";
-
 abstract class Transacao {
   private _valor: number;
   private _descricao: string;

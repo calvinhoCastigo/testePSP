@@ -17,6 +17,9 @@ router.post(
   "/contasareceber/:idCliente",
   transacaoController.insertContasAReceber
 );
-// router.put("/transacao/:idTransacao")
+router.put(
+  "/statuspendente/:idTransacao",
+  transacaoController.alteraStatusPendenteContasAReceber
+);
 router.post("/contasapagar/:idCliente", transacaoController.insertContasAPagar);
 export default router;

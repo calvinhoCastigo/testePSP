@@ -1,4 +1,3 @@
-import Cliente from "./Cliente";
 import Transacao from "./Transacao";
 
 class ContasAReceber extends Transacao {

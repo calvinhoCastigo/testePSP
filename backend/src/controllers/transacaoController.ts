@@ -6,6 +6,12 @@ import ListaContasAReceber from "../models/ListaContasAReceber";
 import ListaContasAPagar from "../models/ListaContasAPagar";
 const db = new Conexao();
 
+const querySelect =
+  "SELECT idTransacao, idCliente, descricaoTransacao, dataTransacao, valorTransacao, is_pendenteTransacao, numeroCartao, cvvCartao, validadeCartao FROM transacao";
+
+const queryInsert =
+  "INSERT INTO transacao (idCliente, descricaoTransacao, dataTransacao, tipoTransacao, valorTransacao, is_pendenteTransacao, numeroCartao, cvvCartao, validadeCartao) VALUES ";
+
 export function montaObjContasAReceber(transacao: any): ContasAReceber {
   const transacaoObj = new ContasAReceber(
     transacao.idTransacao,
@@ -37,19 +43,7 @@ export const getContasAReceber = async (req: Request, res: Response) => {
   const idCliente = parseInt(req.params.idCliente);
   try {
     const sql =
-      `SELECT
-        idTransacao,
-        idCliente,
-        descricaoTransacao,
-        dataTransacao,
-        valorTransacao,
-        is_pendenteTransacao,
-        numeroCartao,
-        cvvCartao,
-        validadeCartao
-      FROM transacao WHERE idCliente =` +
-      idCliente +
-      ` AND tipoTransacao='R'`;
+      querySelect + ` WHERE idCliente =` + idCliente + ` AND tipoTransacao='R'`;
 
     const resultados = await db.query(sql);
 
@@ -71,20 +65,7 @@ export const getContasAPagar = async (req: Request, res: Response) => {
   const idCliente = parseInt(req.params.idCliente);
   try {
     const sql =
-      `SELECT
-        idTransacao,
-        idCliente,
-        descricaoTransacao,
-        dataTransacao,
-        valorTransacao,
-        is_pendenteTransacao,
-        numeroCartao,
-        cvvCartao,
-        validadeCartao
-      FROM transacao WHERE idCliente =` +
-      idCliente +
-      ` AND tipoTransacao='P'`;
-
+      querySelect + ` WHERE idCliente =` + idCliente + ` AND tipoTransacao='P'`;
     const resultados = await db.query(sql);
     let transacoes: ListaContasAPagar = new ListaContasAPagar([]);
 
@@ -102,19 +83,8 @@ export const getContasAPagar = async (req: Request, res: Response) => {
 export const getTransacao = async (req: Request, res: Response) => {
   const idTransacao = parseInt(req.params.idTransacao);
   try {
-    const sql =
-      `SELECT
-        idTransacao,
-        idCliente,
-        descricaoTransacao,
-        dataTransacao,
-        tipoTransacao,
-        valorTransacao,
-        is_pendenteTransacao,
-        numeroCartao,
-        cvvCartao,
-        validadeCartao
-      FROM transacao WHERE idTransacao =` + idTransacao;
+    const sql = querySelect + ` WHERE idTransacao =` + idTransacao;
+
     const resultados = await db.query(sql);
     let transacao: ContasAReceber | ContasAPagar | null = null;
     if (resultados.length > 0) {
@@ -149,9 +119,7 @@ export const insertContasAPagar = async (req: Request, res: Response) => {
   );
   try {
     const sql =
-      "INSERT INTO transacao " +
-      "(idCliente, descricaoTransacao, dataTransacao, tipoTransacao, valorTransacao, is_pendenteTransacao, numeroCartao, cvvCartao, validadeCartao) " +
-      "VALUES " +
+      queryInsert +
       "(" +
       idCliente +
       ",'" +
@@ -193,9 +161,7 @@ export const insertContasAReceber = async (req: Request, res: Response) => {
   );
   try {
     const sql =
-      "INSERT INTO transacao " +
-      "(idCliente, descricaoTransacao, dataTransacao, tipoTransacao, valorTransacao, is_pendenteTransacao, numeroCartao, cvvCartao, validadeCartao) " +
-      "VALUES " +
+      queryInsert +
       "(" +
       idCliente +
       ",'" +
@@ -211,6 +177,23 @@ export const insertContasAReceber = async (req: Request, res: Response) => {
       "', '" +
       transacaoObj.validade +
       "')";
+    let resultados = await db.query(sql);
+    res.json(resultados);
+  } catch (error) {
+    console.error("Erro ao registar a transação:", error);
+    res.status(500).json({ error: "Erro ao registrar a transação" });
+  }
+};
+
+export const alteraStatusPendenteContasAReceber = async (
+  req: Request,
+  res: Response
+) => {
+  const idTransacao = req.params.idTransacao;
+  try {
+    const sql =
+      "UPDATE transacao SET is_pendenteTransacao = FALSE WHERE idTransacao=" +
+      idTransacao;
     let resultados = await db.query(sql);
     res.json(resultados);
   } catch (error) {
